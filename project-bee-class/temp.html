@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Employee Dashboard</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-p2SRgsDW1JbF2GsvHDv5z5fCrDsfX+xJeR02LfZwP4KjbJ4CpZ5p1azSfzM11tEJv54pN6p6LEIoMRkgSpXahQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="m-0 p-0 font-sans bg-gray-100 flex h-screen">
+        <div class="flex w-full">
+            <!-- Sidebar -->
+            <aside class="bg-white w-64 p-5 shadow-lg space-y-5">
+                <!-- Employee Profile Section -->
+                <div class="flex flex-col items-center text-center">
+                    <img src="profile.png" alt="Employee Profile Picture" class="w-24 h-24 rounded-full mb-2">
+                    <h3 class="text-lg font-bold">John Doe</h3>
+                    <p class="text-sm text-gray-500">Employee ID: 12345</p>
+                </div>
+
+                <!-- Sidebar Navigation Menu -->
+                <nav>
+                    <ul class="space-y-2">
+                        <li class="flex items-center space-x-2 p-2 rounded-lg bg-blue-100 cursor-pointer">
+                            <span class="material-symbols-outlined">dashboard</span>
+                            <span>Dashboard</span>
+                        </li>
+                        <li class="flex items-center space-x-2 p-2 rounded-lg cursor-pointer hover:bg-blue-100">
+                            <span class="material-symbols-outlined">task</span>
+                            <span>Task</span>
+                        </li>
+                        <li class="flex items-center space-x-2 p-2 rounded-lg cursor-pointer hover:bg-blue-100">
+                            <span class="material-symbols-outlined">assignment</span>
+                            <span>Reports</span>
+                        </li>
+                        <li class="flex items-center space-x-2 p-2 rounded-lg cursor-pointer hover:bg-blue-100">
+                            <span class="material-symbols-outlined">receipt_long</span>
+                            <span>Payroll</span>
+                        </li>
+                        <li class="flex items-center space-x-2 p-2 rounded-lg cursor-pointer hover:bg-blue-100">
+                            <span class="material-symbols-outlined">how_to_reg</span>
+                            <span>Attendance</span>
+                        </li>
+                        <li class="flex items-center space-x-2 p-2 rounded-lg cursor-pointer hover:bg-blue-100">
+                            <span class="material-symbols-outlined">door_open</span>
+                            <span>Leave Requests</span>
+                        </li>
+                        <li class="flex items-center space-x-2 p-2 rounded-lg cursor-pointer hover:bg-blue-100">
+                            <span class="material-symbols-outlined">settings</span>
+                            <span>Settings</span>
+                        </li>
+                        <li class="flex items-center space-x-2 p-2 rounded-lg cursor-pointer hover:bg-blue-100">
+                            <span class="material-symbols-outlined">help</span>
+                            <span>Support</span>
+                        </li>
+                    </ul>
+                </nav>
+
+                <div class="mt-auto p-2 bg-blue-500 text-white rounded-lg text-center cursor-pointer">
+                    Logout
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 p-5 space-y-5">
+
+                <!-- Dashboard Widgets -->
+                <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                    <!-- Task Status Widget -->
+                    <div class="bg-white p-5 rounded-lg shadow-lg space-y-2">
+                        <h3 class="text-lg font-bold">Task Status</h3>
+                        <p>Completed Tasks: 20</p>
+                        <p>Pending Tasks: 5</p>
+                        <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg">View Tasks</button>
+                    </div>
+
+                    <!-- Attendance Status Widget -->
+                    <div class="bg-white p-5 rounded-lg shadow-lg space-y-2">
+                        <h3 class="text-lg font-bold">Attendance Status</h3>
+                        <p>Present Days: 22</p>
+                        <p>Leave Days: 2</p>
+                        <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg">View Attendance</button>
+                    </div>
+
+                    <!-- Payroll Information Widget -->
+                    <div class="bg-white p-5 rounded-lg shadow-lg space-y-2">
+                        <h3 class="text-lg font-bold">Payroll</h3>
+                        <p>Last Payment: $3000</p>
+                        <p>Next Payment Date: 30th Sep</p>
+                        <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg">View Payroll</button>
+                    </div>
+
+                    <!-- Leave Requests Widget -->
+                    <div class="bg-white p-5 rounded-lg shadow-lg space-y-2">
+                        <h3 class="text-lg font-bold">Leave Requests</h3>
+                        <p>Pending Requests: 1</p>
+                        <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg">Request Leave</button>
+                    </div>
+
+                    <!-- Additional Widgets -->
+                    <div class="bg-white p-5 rounded-lg shadow-lg space-y-2">
+                        <h3 class="text-lg font-bold">Performance Review</h3>
+                        <p>Last Review: 15th Aug</p>
+                        <p>Next Review: 15th Nov</p>
+                        <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg">View Review</button>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-lg shadow-lg space-y-2">
+                        <h3 class="text-lg font-bold">Training Sessions</h3>
+                        <p>Upcoming: Data Analysis - 5th Oct</p>
+                        <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg">View Training</button>
+                    </div>
+                </section>
+
+                <!-- To-Do List for Employee Tasks -->
+                <div class="bg-white p-5 rounded-lg shadow-lg space-y-4">
+                    <h3 class="text-lg font-bold">To-Do List</h3>
+                    <ul class="space-y-2">
+                        <li class="flex justify-between items-center p-2 bg-gray-100 rounded-lg hover:bg-blue-100">
+                            Finish quarterly report <button class="bg-indigo-600 text-white px-3 py-1 rounded">Mark as Done</button>
+                        </li>
+                        <li class="flex justify-between items-center p-2 bg-gray-100 rounded-lg hover:bg-blue-100">
+                            Attend training session on 5th Oct <button class="bg-indigo-600 text-white px-3 py-1 rounded">Mark as Done</button>
+                        </li>
+                        <li class="flex justify-between items-center p-2 bg-gray-100 rounded-lg hover:bg-blue-100">
+                            Submit leave request for 10th Oct <button class="bg-indigo-600 text-white px-3 py-1 rounded">Mark as Done</button>
+                        </li>
+                    </ul>
+                </div>
+            </main>
+
+            <!-- Right Sidebar -->
+            <aside class="w-70 p-5 space-y-5 bg-white shadow-lg">
+                <header class="flex justify-between items-center rounded-lg shadow-lg">
+                    <i class="fa-regular fa-magnifying-glass"></i>
+                    <input type="text" placeholder="Search something..." class="flex-grow p-2 rounded-lg bg-gray-100 border-none">
+                </header>
+                <!-- Calendar Widget -->
+                <div class="bg-gray-100 p-4 rounded-lg shadow-inner">
+                    <h2 class="text-lg font-bold">Calendar</h2>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center font-bold">
+                            <span>September 2024</span>
+                            <span class="flex space-x-1">
+                                <span class="material-symbols-outlined cursor-pointer">chevron_left</span>
+                                <span class="material-symbols-outlined cursor-pointer">chevron_right</span>
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-5 gap-2">
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">1</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">2</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">3</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">4</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">5</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">6</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">7</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">8</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">9</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">10</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">11</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">12</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">13</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">14</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">15</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">16</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">17</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">18</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">19</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">20</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">21</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">22</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">23</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">24</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">25</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">26</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">27</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">28</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">29</div>
+                            <div class="flex justify-center items-center p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">30</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications Section -->
+                <div class="bg-gray-100 p-4 rounded-lg shadow-inner">
+                    <h2 class="flex text-lg font-bold items-center pb-2">
+                        <span class="material-symbols-outlined mr-2">
+                            info
+                        </span>
+                        Notifications
+                    </h2>
+                    <ul class="space-y-2">
+                        <li class="p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">
+                            <span>Meeting with HR at 3 PM</span>
+                        </li>
+                        <li class="p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">
+                            <span>Project deadline is on 10th Oct</span>
+                        </li>
+                        <li class="p-2 bg-white rounded-lg shadow cursor-pointer hover:bg-blue-100">
+                            <span>New training session added</span>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </body>
+</html>
