@@ -1,58 +1,60 @@
-const express = require('express');
 const employee = require('../models/employeeSchema');
 const bcrypt = require('bcrypt');
 
 const addEmployee = async (req, res) => {
     try {
-        const inputData = {
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
-            address: req.body.address,
-            email: req.body.email,
-            age: req.body.age,
-            salary: req.body.salary,
-            designation: req.body.designation,
-            passportNumber: req.body.passportNumber,
-            nominee: req.body.nominee,
-            userId: req.body.userId,
-            password: await bcrypt.hash(req.body.password, 10),
-            photo: req.file.filename // Store the uploaded photo's filename
-        };
+        const { firstName, lastName, address, email, age, salary, designation, passportNumber, nominee, userId, password } = req.body;
         
-        console.log(inputData);
-        if (!inputData.firstName || !inputData.lastName || !inputData.email || !inputData.userId || !inputData.password || !req.file) {
-            return res.status(400).send("Enter All Data, including a photo");
+        // Basic Validation
+        if (!firstName || !lastName || !email || !userId || !password || !req.file) {
+            return res.status(400).json({ error: "Please fill in all required fields and upload a profile photo." });
+        }
+
+        const parsedAge = parseInt(age);
+        const parsedSalary = parseInt(salary);
+        const parsedUserId = parseInt(userId);
+
+        if (isNaN(parsedAge) || isNaN(parsedSalary) || isNaN(parsedUserId)) {
+            return res.status(400).json({ error: "Age, Salary, and User ID must be valid numbers." });
         }
 
         // Check for existing employee by userId or email
-        const checkId = await employee.findOne({ userId: inputData.userId });
+        const checkId = await employee.findOne({ where: { userId: parsedUserId } });
         if (checkId) {
-            return res.status(409).send({
-                status: 409,
-                message: 'Employee already exists'
-            });
-        }
-        const checkEmail = await employee.findOne({ email: inputData.email });
-        if (checkEmail) {
-            return res.status(409).send({
-                status: 409,
-                message: 'An employee with this email already exists'
-            });
+            return res.status(409).json({ error: "An employee with this User ID already exists." });
         }
 
-        // Add photo path to inputData
-        inputData.photo = req.file.filename;  // Save the photo filename
-        
+        const checkEmail = await employee.findOne({ where: { email: email } });
+        if (checkEmail) {
+            return res.status(409).json({ error: "An employee with this email already exists." });
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         // Create new employee record
-        const data = await employee.create(inputData);
+        const data = await employee.create({
+            firstName,
+            lastName,
+            address,
+            email,
+            age: parsedAge,
+            salary: parsedSalary,
+            designation,
+            passportNumber,
+            nominee,
+            userId: parsedUserId,
+            password: hashedPassword,
+            photo: req.file.filename
+        });
+
         res.status(201).json({
-            status: 201,
-            message: 'Employee Added',
+            message: 'Employee account created successfully!',
             data: data
         });
     } catch (err) {
-        console.error(err);
-        res.status(500).send("Internal Server Error");
+        console.error("Error adding employee:", err);
+        res.status(500).json({ error: "An internal server error occurred while creating the account." });
     }
 }
 

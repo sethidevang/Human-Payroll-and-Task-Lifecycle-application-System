@@ -1,60 +1,64 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const employeeSchema = new mongoose.Schema({
+const Employee = sequelize.define('Employee', {
     firstName: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     lastName: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     address: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     email: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
         unique: true,
     },
     age: {
-        type: Number,
-        required: true,
+        type: DataTypes.INTEGER,
+        allowNull: false,
     },
     salary: {
-        type: Number,
-        required: true,
+        type: DataTypes.INTEGER,
+        allowNull: false,
     },
     designation: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     passportNumber: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     nominee: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     userId: {
-        type: Number,
-        required: true,
+        type: DataTypes.INTEGER,
+        allowNull: false,
         unique: true
     },
     password: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     emailNotifications: {
-        type: Boolean,
-        default: true
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
     },
     smsNotifications: {
-        type: Boolean,
-        default: false
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     }
+}, {
+    tableName: 'employees',
+    timestamps: true // Adds createdAt and updatedAt fields
 });
 
-module.exports = mongoose.model('employee', employeeSchema);
+module.exports = Employee;

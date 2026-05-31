@@ -46,6 +46,9 @@ const employeeModel = require('./models/employeeSchema');
 const leaveRequestModel = require('./models/leaveRequestSchema');
 const taskModel = require('./models/taskSchema');
 const SupportRequestModel = require('./models/supportRequest');
+const attendanceModel = require('./models/attendanceSchema');
+const payrollModel = require('./models/payrollSchema');
+const performanceModel = require('./models/performanceSchema');
 
 const employeeController = require('./controllers/employeeController');
 const leaveRequestController = require('./controllers/leaveRequestController');
@@ -56,7 +59,7 @@ const taskController = require('./controllers/taskController');
 const createAdminUser = async () => {
   try {
       // Check if admin already exists
-      const adminExists = await employeeModel.findOne({ email: 'admin@hrsuite.com' });
+      const adminExists = await employeeModel.findOne({ where: { email: 'admin@hrsuite.com' } });
       if (adminExists) {
           console.log('Admin user already exists.');
           return;
@@ -89,9 +92,10 @@ dBConnect().then(() => {
   createAdminUser();
 });
 
-employeeModel();
-leaveRequestModel();
-taskModel();
+// Sequelize models don't need to be called as functions
+// employeeModel();
+// leaveRequestModel();
+// taskModel();
 
 const storage = multer.diskStorage({
   destination: function(req, file, callback) {
@@ -151,7 +155,7 @@ app.post('/admin-login', async (req, res) => {
 
   try {
     // Find admin by email
-    const admin = await employeeModel.findOne({ email: email, designation: 'Admin' });
+    const admin = await employeeModel.findOne({ where: { email: email, designation: 'Admin' } });
 
     if (!admin) {
       return res.status(401).render('admin-login', { error: 'Invalid email or password' });
@@ -166,7 +170,7 @@ app.post('/admin-login', async (req, res) => {
     console.log("Admin Logged In");
 
     // Set session
-    req.session.adminId = admin._id; // Save admin ID to the session
+    req.session.adminId = admin.id; // Save admin ID to the session
     res.redirect('/admin/admin-dashboard');
   } catch (err) {
     console.error('Error during admin login:', err);
@@ -218,7 +222,7 @@ app.post('/employee-login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const employee = await employeeModel.findOne({ email: email });
+    const employee = await employeeModel.findOne({ where: { email: email } });
 
     if (!employee) {
       return res.status(401).render('employee-login', { error: 'Invalid email or password' });
@@ -254,11 +258,12 @@ app.get('/employee-logout', (req, res) => {
 // MARK: - Admin APIs
 app.get("/admin/admin-dashboard", async (req, res) => {
   try {
-    const employeeCount = await employeeModel.countDocuments();
-    const leaveCount = await leaveRequestModel.countDocuments();
-    const acceptedLeaveCount = await leaveRequestModel.countDocuments({ status: 'Approved' });
-    const tasksPendingCount = await taskModel.countDocuments({ status: false });
-    const tasksCompletedCount = await taskModel.countDocuments({ status: true });
+    const employeeCount = await employeeModel.count();
+    const leaveCount = await leaveRequestModel.count();
+    const acceptedLeaveCount = await leaveRequestModel.count({ where: { status: 'Approved' } });
+    const tasksPendingCount = await taskModel.count({ where: { status: false } });
+    const tasksCompletedCount = await taskModel.count({ where: { status: true } });
+    const pendingPayrollsCount = await payrollModel.count({ where: { status: 'Pending' } });
 
     res.render("admin-Dashboard", {
       employeeCount: employeeCount - 1,
@@ -266,6 +271,7 @@ app.get("/admin/admin-dashboard", async (req, res) => {
       leaveCount: leaveCount - acceptedLeaveCount,
       tasksPendingCount: tasksPendingCount,
       tasksCompletedCount: tasksCompletedCount,
+      pendingPayrollsCount: pendingPayrollsCount
     });
   } catch (err) {
     console.error("Error fetching data: ", err);
@@ -275,8 +281,8 @@ app.get("/admin/admin-dashboard", async (req, res) => {
 
 app.get("/admin/admin-attendance", async (req, res) => {
   try {
-    const leaveRequests = await leaveRequestModel.find({});
-    const employees = await employeeModel.find({}, "userId firstName lastName");
+    const leaveRequests = await leaveRequestModel.findAll();
+    const employees = await employeeModel.findAll({ attributes: ["userId", "firstName", "lastName"] });
     
     res.render("admin-dashboard/admin-attendance", {
       leaveRequests: leaveRequests,
@@ -292,13 +298,13 @@ app.post('/admin/update-leave-status', leaveRequestController.updateLeaveRequest
 app.get("/admin/report", (req, res) => {
   res.render("admin-dashboard/report");
 });
-app.get("/admin/employee-add", (req, res) => {
+app.get("/admin/add-employee", ensureAdmin, (req, res) => {
   res.render("admin-dashboard/employee-add");
 });
-app.post('/employee-add', upload.single('photo-upload'), employeeController.addEmployee);
+app.post('/admin/add-employee', ensureAdmin, upload.single('photo-upload'), employeeController.addEmployee);
 app.get("/admin/IDCard", async (req, res) => {
   try {
-      const employeeRequests = await employeeModel.find({});
+      const employeeRequests = await employeeModel.findAll();
       res.render("admin-dashboard/IDCard", {
         employees: employeeRequests
       });
@@ -309,8 +315,8 @@ app.get("/admin/IDCard", async (req, res) => {
 });
 app.get("/admin/admin-payroll", async (req, res) => {
   try {
-      const employeeRequests = await employeeModel.find({}, 'userId firstName lastName designation salary');
-      const taskRequests = await taskModel.find({});
+      const employeeRequests = await employeeModel.findAll({ attributes: ['userId', 'firstName', 'lastName', 'designation', 'salary'] });
+      const taskRequests = await taskModel.findAll();
       res.render("admin-dashboard/admin-payroll", {
         employees: employeeRequests,
         tasks: taskRequests
@@ -322,8 +328,8 @@ app.get("/admin/admin-payroll", async (req, res) => {
 });
 app.get("/admin/admin-task", async (req, res) => {
   try {
-      const employeeRequests = await employeeModel.find({}, 'userId firstName lastName designation');
-      const taskRequests = await taskModel.find({});
+      const employeeRequests = await employeeModel.findAll({ attributes: ['userId', 'firstName', 'lastName', 'designation'] });
+      const taskRequests = await taskModel.findAll();
       res.render("admin-dashboard/admin-task", {
         employees: employeeRequests,
         tasks: taskRequests
@@ -335,7 +341,7 @@ app.get("/admin/admin-task", async (req, res) => {
 });
 app.get('/admin/tasks', async (req, res) => {
   try {
-      const tasks = await taskModel.find({});
+      const tasks = await taskModel.findAll();
       res.json(tasks);
   } catch (err) {
       console.error("Error fetching tasks:", err);
@@ -347,29 +353,65 @@ app.post('/admin/add-task', taskController.taskAssignment);
 app.delete('/admin/delete-task', taskController.taskDelete);
 
 // MARK: - Employee APIs
-app.get("/employee-dashboard", checkEmployeeLoggedIn, async (req, res) => {
+app.use('/employee-dashboard', checkEmployeeLoggedIn);
+
+app.get("/employee-dashboard", async (req, res) => {
   try {
     const id = req.session.employeeId;
-    const user = await employeeModel.findOne({ userId: id });
-    const tasksPendingCount = (await taskModel.countDocuments({
-      userId: id,
-      status: false
+    const user = await employeeModel.findOne({ where: { userId: id } });
+    const tasks = await taskModel.findAll({ where: { userId: id }, order: [['createdAt', 'DESC']] });
+    const tasksPendingCount = (await taskModel.count({
+      where: {
+        userId: id,
+        status: false
+      }
     }));
-    const tasksCompletedCount = (await taskModel.countDocuments({
-      userId: id,
-      status: true
+    const tasksCompletedCount = (await taskModel.count({
+      where: {
+        userId: id,
+        status: true
+      }
     }));
-    const leaveRequestsCount = await leaveRequestModel.countDocuments({
-      userId: id,
-      status: 'Pending'
+    const leaveRequestsCount = await leaveRequestModel.count({
+      where: {
+        userId: id,
+        status: 'Pending'
+      }
+    });
+
+    // Fetch Attendance Data
+    const presentDays = await attendanceModel.count({
+      where: { userId: id, status: 'Present' }
+    });
+    const leaveDays = await attendanceModel.count({
+      where: { userId: id, status: 'On Leave' }
+    });
+
+    // Fetch Payroll Data
+    const lastPayroll = await payrollModel.findOne({
+      where: { userId: id },
+      order: [['paymentDate', 'DESC']]
+    });
+
+    // Fetch Performance Data
+    const latestReview = await performanceModel.findOne({
+      where: { userId: id },
+      order: [['lastReviewDate', 'DESC']]
     });
     
     res.render("employee-dashboard", {
       tasksPendingCount: tasksPendingCount,
       tasksCompletedCount: tasksCompletedCount,
       leaveRequestsCount,
+      presentDays,
+      leaveDays,
+      lastPayment: lastPayroll ? `$${lastPayroll.amount}` : 'N/A',
+      nextPaymentDate: lastPayroll ? lastPayroll.nextPaymentDate : 'N/A',
+      lastReviewDate: latestReview ? latestReview.lastReviewDate : 'N/A',
+      nextReviewDate: latestReview ? latestReview.nextReviewDate : 'N/A',
       username: user.firstName + " " + user.lastName,
-      userId: user.userId
+      userId: user.userId,
+      tasks: tasks // Add tasks to the template
     });
   } catch (err) {
     console.error("Error Retreiving Data: ", err);
@@ -384,10 +426,13 @@ app.get("/employee-dashboard/:id/:name", (req, res) => {
 app.get("/employee-dashboard/task", async (req, res) => {
   try {
     const id = req.session.employeeId;
-    const user = await employeeModel.findOne({ userId: id });
-    const taskRequests = await taskModel.find({ userId: id }).sort({ status: 1 });
+    const user = await employeeModel.findOne({ where: { userId: id } });
+    const tasks = await taskModel.findAll({ 
+      where: { userId: id },
+      order: [['createdAt', 'DESC']] 
+    });
     res.render("employee-dashboard/task", {
-      tasks: taskRequests,
+      tasks: tasks,
       username: user.firstName + " " + user.lastName,
       userId: user.userId
     });
@@ -400,46 +445,62 @@ app.get("/employee-dashboard/task", async (req, res) => {
 app.get("/employee-dashboard/attendance", async (req, res) => {
   try {
     const id = req.session.employeeId;
-    const user = await employeeModel.findOne({ userId: id });
+    const user = await employeeModel.findOne({ where: { userId: id } });
+    const attendanceRecords = await attendanceModel.findAll({
+      where: { userId: id },
+      order: [['date', 'DESC']]
+    });
     res.render("employee-dashboard/attendance", {
+      attendance: attendanceRecords,
       username: user.firstName + " " + user.lastName,
       userId: user.userId
     });
   } catch (err) {
-    console.error("Error Retreiving Data: ", err);
+    console.error("Error fetching attendance: ", err);
     res.status(500).send("Internal Server Error");
   }
 });
 app.get("/employee-dashboard/payroll", async (req, res) => {
   try {
     const id = req.session.employeeId;
-    const user = await employeeModel.findOne({ userId: id });
+    const user = await employeeModel.findOne({ where: { userId: id } });
+    const payrollRecords = await payrollModel.findAll({
+      where: { userId: id },
+      order: [['paymentDate', 'DESC']]
+    });
     res.render("employee-dashboard/payroll", {
+      payroll: payrollRecords,
       username: user.firstName + " " + user.lastName,
-      userId: user.userId
+      userId: user.userId,
+      basicSalary: user.salary
     });
   } catch (err) {
-    console.error("Error Retreiving Data: ", err);
+    console.error("Error fetching payroll: ", err);
     res.status(500).send("Internal Server Error");
   }
 });
 app.get("/employee-dashboard/performance", async (req, res) => {
   try {
     const id = req.session.employeeId;
-    const user = await employeeModel.findOne({ userId: id });
+    const user = await employeeModel.findOne({ where: { userId: id } });
+    const performanceReviews = await performanceModel.findAll({
+      where: { userId: id },
+      order: [['lastReviewDate', 'DESC']]
+    });
     res.render("employee-dashboard/performance", {
+      performance: performanceReviews,
       username: user.firstName + " " + user.lastName,
       userId: user.userId
     });
   } catch (err) {
-    console.error("Error Retreiving Data: ", err);
+    console.error("Error fetching performance: ", err);
     res.status(500).send("Internal Server Error");
   }
 });
 app.get("/employee-dashboard/trainingSession", async (req, res) => {
   try {
     const id = req.session.employeeId;
-    const user = await employeeModel.findOne({ userId: id });
+    const user = await employeeModel.findOne({ where: { userId: id } });
     res.render("employee-dashboard/trainingSession", {
       username: user.firstName + " " + user.lastName,
       userId: user.userId
@@ -452,8 +513,8 @@ app.get("/employee-dashboard/trainingSession", async (req, res) => {
 app.get("/employee-dashboard/leaveRequest", async (req, res) => {
   try {
       const id = req.session.employeeId;
-      const user = await employeeModel.findOne({ userId: id });
-      const leaveRequests = await leaveRequestModel.find({});
+      const user = await employeeModel.findOne({ where: { userId: id } });
+      const leaveRequests = await leaveRequestModel.findAll();
       res.render("employee-dashboard/leaveRequest", {
           leaves: leaveRequests,
           username: user.firstName + " " + user.lastName,
@@ -468,7 +529,7 @@ app.post('/leave-request', leaveRequestController.leaveRequest);
 app.get("/employee-dashboard/settings", async (req, res) => {
   try {
     const id = req.session.employeeId;
-    const user = await employeeModel.findOne({ userId: id });
+    const user = await employeeModel.findOne({ where: { userId: id } });
     res.render("employee-dashboard/settings", {
       username: user.firstName + " " + user.lastName,
       userId: user.userId,
@@ -486,7 +547,7 @@ app.post("/employee-dashboard/settings/update-password", async (req, res) => {
     const userId = req.session.employeeId;
 
     // Find the employee by userId
-    const employee = await employeeModel.findOne({ userId: userId });
+    const employee = await employeeModel.findOne({ where: { userId: userId } });
 
     if (!employee) {
       return res.status(404).send("Employee not found");
@@ -562,6 +623,64 @@ app.post("/support/request", async (req, res) => {
   }
 });
 
+
+// MARK: - Task API for Employee Dashboard
+app.post('/api/tasks', checkEmployeeLoggedIn, async (req, res) => {
+  try {
+    const { title } = req.body;
+    const userId = req.session.employeeId;
+    const user = await employeeModel.findOne({ where: { userId } });
+
+    const lastTask = await taskModel.findOne({ order: [['taskId', 'DESC']] });
+    const newTaskId = lastTask ? lastTask.taskId + 1 : 1;
+
+    const newTask = await taskModel.create({
+      userId,
+      taskId: newTaskId,
+      name: user.firstName + " " + user.lastName,
+      designation: user.designation,
+      title,
+      description: 'Self-assigned task',
+      assignedDate: new Date(),
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Default 1 week
+      status: false
+    });
+
+    res.status(201).json(newTask);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.patch('/api/tasks/:taskId', checkEmployeeLoggedIn, async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const task = await taskModel.findOne({ where: { taskId, userId: req.session.employeeId } });
+    if (!task) return res.status(404).json({ error: 'Task not found' });
+
+    task.status = !task.status;
+    await task.save();
+    res.json(task);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.delete('/api/tasks/:taskId', checkEmployeeLoggedIn, async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const task = await taskModel.findOne({ where: { taskId, userId: req.session.employeeId } });
+    if (!task) return res.status(404).json({ error: 'Task not found' });
+
+    await task.destroy();
+    res.json({ message: 'Task deleted' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 passport.serializeUser(function(user, cb) {
   process.nextTick(function() {

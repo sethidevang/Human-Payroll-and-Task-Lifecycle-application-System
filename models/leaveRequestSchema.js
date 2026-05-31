@@ -1,31 +1,34 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const leaveRequest = new mongoose.Schema({
+const LeaveRequest = sequelize.define('LeaveRequest', {
     userId: {
-        type: Number,
-        required: true
+        type: DataTypes.INTEGER,
+        allowNull: false
     },
     leaveType: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     startDate: {
-        type: Date,
-        required: true,
+        type: DataTypes.DATE,
+        allowNull: false,
     },
     endDate: {
-        type: Date,
-        required: true,
+        type: DataTypes.DATE,
+        allowNull: false,
     },
     reason: {
-        type: String,
-        required: true,
+        type: DataTypes.TEXT,
+        allowNull: false,
     },
     status: {
-        type: String,
-        default: 'Pending', // Default to 'Pending' on submission
-        enum: ['Pending', 'Approved', 'Rejected']
+        type: DataTypes.ENUM('Pending', 'Approved', 'Rejected'),
+        defaultValue: 'Pending'
     }
+}, {
+    tableName: 'leave_requests',
+    timestamps: true
 });
 
-module.exports = mongoose.model('leaveRequest', leaveRequest);
+module.exports = LeaveRequest;

@@ -1,14 +1,16 @@
-const mongoose = require('mongoose');
-const id = require('../config/credentials');
+const sequelize = require('../config/database');
 
 const dBConnect = async () => {
     try {
-        console.log("Attempting to connect to MongoDB Atlas...");
-        await mongoose.connect(`mongodb+srv://${id.user1}:${id.pass1}@hrsuite.f0nxb.mongodb.net/?retryWrites=true&w=majority&appName=HRSuite`);
+        console.log("Attempting to connect to PostgreSQL...");
+        await sequelize.authenticate();
+        console.log("Successfully connected to PostgreSQL");
 
-        console.log("Successfully connected to MongoDB Atlas");
+        // Sync all models
+        await sequelize.sync({ alter: true }); // Use alter: true to update tables if they already exist
+        console.log("Database models synchronized successfully");
     } catch (error) {
-        console.error("MongoDB connection error occurred: ", error.message);
+        console.error("PostgreSQL connection error occurred: ", error.message);
         throw error;
     }
 }

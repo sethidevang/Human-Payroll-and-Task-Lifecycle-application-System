@@ -38,7 +38,7 @@
                     </thead>
                     <tbody>
                         <% leaveRequests.forEach(function(leaveRequest) { %>
-                            <tr data-id="<%= leaveRequest._id %>" class="hover:bg-gray-100">
+                            <tr data-id="<%= leaveRequest.id %>" class="hover:bg-gray-100">
                                 <td class="py-2 px-4 border-b"><%= leaveRequest.userId %></td>
                                 <td class="py-2 px-4 border-b">
                                     <%= (employees.find(emp => emp.userId === leaveRequest.userId) || {}).firstName || 'Unknown' %> 
@@ -87,23 +87,23 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Example Row 1 -->
-                        <tr class="hover:bg-gray-100">
-                            <td class="py-2 px-4 border-b">John Doe</td>
-                            <td class="py-2 px-4 border-b">20</td>
-                            <td class="py-2 px-4 border-b">2</td>
-                            <td class="py-2 px-4 border-b">1</td>
-                            <td class="py-2 px-4 border-b">90%</td>
-                        </tr>
-                        <!-- Example Row 2 -->
-                        <tr class="hover:bg-gray-100">
-                            <td class="py-2 px-4 border-b">Jane Smith</td>
-                            <td class="py-2 px-4 border-b">18</td>
-                            <td class="py-2 px-4 border-b">4</td>
-                            <td class="py-2 px-4 border-b">0</td>
-                            <td class="py-2 px-4 border-b">82%</td>
-                        </tr>
-                        <!-- Add more rows as necessary -->
+                        <% if (employees.length > 0) { %>
+                            <% employees.forEach(employee => { %>
+                                <% if (employee.designation !== 'Admin') { %>
+                                <tr class="hover:bg-gray-100">
+                                    <td class="py-2 px-4 border-b"><%= employee.firstName %> <%= employee.lastName %></td>
+                                    <td class="py-2 px-4 border-b">0</td>
+                                    <td class="py-2 px-4 border-b">0</td>
+                                    <td class="py-2 px-4 border-b">0</td>
+                                    <td class="py-2 px-4 border-b">0%</td>
+                                </tr>
+                                <% } %>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-gray-500">No employees found in database.</td>
+                            </tr>
+                        <% } %>
                     </tbody>
                 </table>
             </div>

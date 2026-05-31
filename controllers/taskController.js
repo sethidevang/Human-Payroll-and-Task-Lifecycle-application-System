@@ -1,4 +1,3 @@
-const express = require('express');
 const taskSchema = require('../models/taskSchema');
 
 const taskAssignment = async (req, res) => {
@@ -9,7 +8,9 @@ const taskAssignment = async (req, res) => {
             return res.status(400).send("All fields are required");
         }
 
-        const lastTask = await taskSchema.findOne().sort({ taskId: -1 });
+        const lastTask = await taskSchema.findOne({
+            order: [['taskId', 'DESC']]
+        });
         const newTaskId = lastTask ? lastTask.taskId + 1 : 1;
 
         const inputData = {
@@ -19,8 +20,8 @@ const taskAssignment = async (req, res) => {
             designation,
             title,
             description,
-            assignedDate,
-            dueDate,
+            assignedDate: new Date(assignedDate),
+            dueDate: new Date(dueDate),
             status: status || false // Default to false if status is not provided
         };
 
@@ -44,7 +45,7 @@ const taskToggleStatus = async (req, res) => {
             return res.status(400).send("Task ID is required");
         }
 
-        const task = await taskSchema.findOne({ taskId });
+        const task = await taskSchema.findOne({ where: { taskId } });
 
         if (!task) {
             return res.status(404).send("Task not found");
@@ -68,23 +69,23 @@ const taskDelete = async (req, res) => {
     try {
         const { taskId } = req.body;
 
-        // Validate input
         if (!taskId) {
             return res.status(400).send("Task ID is required");
         }
 
-        // Delete the task by taskId
-        const result = await taskSchema.findOneAndDelete({ taskId });
+        const task = await taskSchema.findOne({ where: { taskId } });
 
-        // Check if the task was found and deleted
-        if (!result) {
+        if (!task) {
             return res.status(404).send("Task not found");
         }
+
+        const deletedData = task.toJSON();
+        await task.destroy();
 
         res.status(200).json({
             status: 200,
             message: 'Task deleted successfully',
-            data: result
+            data: deletedData
         });
     } catch (err) {
         console.error(err);

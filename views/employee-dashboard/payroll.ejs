@@ -12,7 +12,6 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom styling for payroll page */
         .payroll-card {
             background-color: #ffffff;
             border-radius: 8px;
@@ -43,10 +42,10 @@
         <%- include('../employee/left-bar') %>
 
         <!-- Main content for employee payroll dashboard -->
-        <main class="flex-1 p-5 space-y-5">
+        <main class="flex-1 p-5 space-y-5 overflow-y-auto">
             <h1 class="text-2xl font-bold mb-5">Your Payroll</h1>
 
-            <!-- Payroll Overview -->
+            <!-- Current Salary Breakdown -->
             <div class="payroll-card space-y-5">
                 <h3 class="text-lg font-bold">Salary Breakdown</h3>
                 <table class="payroll-table w-full text-left">
@@ -60,10 +59,10 @@
                     </thead>
                     <tbody id="payrollDetails">
                         <tr>
-                            <td>₹30,000</td>
-                            <td>₹300</td>
-                            <td>₹200</td>
-                            <td>₹30,100</td>
+                            <td>₹<%= basicSalary.toLocaleString() %></td>
+                            <td>₹0</td>
+                            <td>₹0</td>
+                            <td>₹<%= basicSalary.toLocaleString() %></td>
                         </tr>
                     </tbody>
                 </table>
@@ -76,35 +75,31 @@
                 <table class="payroll-table w-full text-left">
                     <thead>
                         <tr>
-                            <th>Month</th>
-                            <th>Basic Salary</th>
-                            <th>Allowances</th>
-                            <th>Deductions</th>
-                            <th>Net Salary</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Next Payment</th>
                         </tr>
                     </thead>
                     <tbody id="payrollHistory">
-                        <tr>
-                            <td>September 2024</td>
-                            <td>₹30,000</td>
-                            <td>₹300</td>
-                            <td>₹200</td>
-                            <td>₹30,100</td>
-                        </tr>
-                        <tr>
-                            <td>August 2024</td>
-                            <td>₹30,000</td>
-                            <td>₹300</td>
-                            <td>₹200</td>
-                            <td>₹30,100</td>
-                        </tr>
-                        <tr>
-                            <td>July 2024</td>
-                            <td>₹30,000</td>
-                            <td>₹300</td>
-                            <td>₹200</td>
-                            <td>₹30,100</td>
-                        </tr>
+                        <% if (payroll.length > 0) { %>
+                            <% payroll.forEach(record => { %>
+                            <tr>
+                                <td><%= new Date(record.paymentDate).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' }) %></td>
+                                <td>₹<%= record.amount.toLocaleString() %></td>
+                                <td>
+                                    <span class="px-2 py-1 rounded text-sm <%= record.status === 'Paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' %>">
+                                        <%= record.status %>
+                                    </span>
+                                </td>
+                                <td><%= record.nextPaymentDate ? new Date(record.nextPaymentDate).toLocaleDateString() : 'N/A' %></td>
+                            </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="4" class="text-center text-gray-500 italic">No payroll history found.</td>
+                            </tr>
+                        <% } %>
                     </tbody>
                 </table>
             </div>
@@ -113,21 +108,5 @@
         <!-- Rightbar -->
         <%- include('../employee/right-bar') %>
     </div>
-
-    <script>
-        (async function() {
-        if (performance.navigation.type == 2) {
-            try {
-                const response = await fetch('/employee/check-state', { method: 'GET' });
-    
-                if (!response.ok) {
-                    window.location.href = "/employee-login";
-                }
-            } catch (err) {
-                console.log(err);
-            }
-        }
-        })();
-    </script>
 </body>
 </html>

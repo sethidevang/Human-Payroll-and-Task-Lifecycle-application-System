@@ -1,18 +1,19 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
 
-const supportRequestSchema = new mongoose.Schema({
+const SupportRequest = sequelize.define('SupportRequest', {
     userId: {
-        type: Number,
-        required: true
+        type: DataTypes.INTEGER,
+        allowNull: false
     },
     issue: {
-        type: String,
-        required: true
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
+        type: DataTypes.TEXT,
+        allowNull: false
     }
+}, {
+    tableName: 'support_requests',
+    timestamps: true, // This will handle createdAt automatically
+    updatedAt: false
 });
 
-module.exports = mongoose.model('SupportRequest', supportRequestSchema);
+module.exports = SupportRequest;

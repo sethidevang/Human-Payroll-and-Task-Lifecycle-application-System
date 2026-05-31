@@ -11,9 +11,7 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Custom styling for attendance page */
         .attendance-card {
             background-color: #ffffff;
             border-radius: 8px;
@@ -35,28 +33,6 @@
         .attendance-table tr:nth-child(even) {
             background-color: #f9fafb;
         }
-
-        /* Mark Leave with red text */
-        .leave-status {
-            color: red;
-        }
-
-        #attendanceChartContainer {
-            width: 220px; /* Adjust the width to provide some padding */
-            height: 220px; /* Adjust the height accordingly */
-            display: flex;
-            justify-content: center; /* Center the chart */
-            align-items: center; /* Center vertically */
-            margin-top: 20px; /* Optional margin */
-        }
-
-        /* Align the attendance stats to the right */
-        .attendance-stats {
-            display: flex;
-            flex-direction: column; /* Align items vertically */
-            justify-content: center; /* Center vertically */
-            margin-left: 20px; /* Space between chart and stats */
-        }
     </style>
 </head>
 
@@ -65,46 +41,44 @@
         <!-- Leftbar -->
         <%- include('../employee/left-bar') %>
 
-        <!-- Main content for attendance -->
-        <main class="flex-1 p-5 space-y-5">
-            <h1 class="text-2xl font-bold mb-5">Attendance Management</h1>
+        <!-- Main content for employee attendance dashboard -->
+        <main class="flex-1 p-5 space-y-5 overflow-y-auto">
+            <h1 class="text-2xl font-bold mb-5">Your Attendance</h1>
 
-            <!-- Attendance Overview -->
-            <div class="attendance-card flex items-center space-x-5"> <!-- Flex container for chart and stats -->
-                <div id="attendanceChartContainer">
-                    <canvas id="attendanceChart" width="200" height="200"></canvas> <!-- Increased size -->
-                </div>
-
-                <div class="attendance-stats">
-                    <p><strong>Present Days:</strong> 22</p>
-                    <p><strong>Leave Days:</strong> 2</p>
-                </div>
-            </div>
-
-            <!-- Attendance Records -->
             <div class="attendance-card space-y-5">
-                <h3 class="text-lg font-bold">Attendance Records</h3>
+                <h3 class="text-lg font-bold">Attendance History</h3>
 
                 <table class="attendance-table w-full text-left">
                     <thead>
                         <tr>
                             <th>Date</th>
                             <th>Status</th>
+                            <th>Clock In</th>
+                            <th>Clock Out</th>
                         </tr>
                     </thead>
-                    <tbody id="attendanceRecords">
-                        <tr>
-                            <td>01-Oct-2024</td>
-                            <td>Present</td>
-                        </tr>
-                        <tr>
-                            <td>02-Oct-2024</td>
-                            <td>Present</td>
-                        </tr>
-                        <tr>
-                            <td>03-Oct-2024</td>
-                            <td class="leave-status">Leave</td> <!-- Marking leave with red color -->
-                        </tr>
+                    <tbody id="attendanceHistory">
+                        <% if (attendance.length > 0) { %>
+                            <% attendance.forEach(record => { %>
+                            <tr>
+                                <td><%= new Date(record.date).toLocaleDateString() %></td>
+                                <td>
+                                    <span class="px-2 py-1 rounded text-sm 
+                                        <%= record.status === 'Present' ? 'bg-green-100 text-green-700' : 
+                                           record.status === 'Absent' ? 'bg-red-100 text-red-700' : 
+                                           'bg-yellow-100 text-yellow-700' %>">
+                                        <%= record.status %>
+                                    </span>
+                                </td>
+                                <td><%= record.clockIn ? new Date(record.clockIn).toLocaleTimeString() : 'N/A' %></td>
+                                <td><%= record.clockOut ? new Date(record.clockOut).toLocaleTimeString() : 'N/A' %></td>
+                            </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="4" class="text-center text-gray-500 italic">No attendance records found.</td>
+                            </tr>
+                        <% } %>
                     </tbody>
                 </table>
             </div>
@@ -113,40 +87,5 @@
         <!-- Rightbar -->
         <%- include('../employee/right-bar') %>
     </div>
-
-    <script>
-        (async function() {
-        if (performance.navigation.type == 2) {
-            try {
-                const response = await fetch('/employee/check-state', { method: 'GET' });
-    
-                if (!response.ok) {
-                    window.location.href = "/employee-login";
-                }
-            } catch (err) {
-                console.log(err);
-            }
-        }
-        })();
-      
-        // Initialize Chart.js
-        const ctx = document.getElementById('attendanceChart').getContext('2d');
-        const attendanceChart = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: ['Present', 'Leave'],
-                datasets: [{
-                    label: 'Attendance Status',
-                    data: [22, 2], // Initial data
-                    backgroundColor: ['#4f46e5', '#f87171'],
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-            }
-        });
-    </script>
 </body>
-
 </html>
